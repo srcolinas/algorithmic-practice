@@ -127,6 +127,7 @@ class Tester:
             choices=choices)
         parser.add_argument('-l', '--max-length', type=int, default=10)
         parser.add_argument('-s', '--step', type=int, default=2)
+        parser.add_argument('-e', '--exponential-mode', action='store_true')
         args = parser.parse_args(sys.argv[2:])
 
         sort_functions = tuple(self.available_methods.items())
@@ -140,7 +141,17 @@ class Tester:
         line = "{:>{width}}" + "|{:>20}"*len(sort_functions)
         print(line.format(*used_names, width=width))
         line = "{:>{width}}" + "|{:<20.15}"*len(sort_functions)
-        for length in range(args.step, args.max_length + args.step, args.step):
+        if args.exponential_mode:
+            def help(step, max_length):
+                val = step
+                while val <= max_length:
+                    yield val
+                    val = val * step
+            iterator = help(args.step, args.max_length)    
+        else:
+            iterator = range(args.step, args.max_length + args.step, args.step)
+            
+        for length in iterator:
             list_ = list(range(length))
             reference = list(range(length))
             random.shuffle(list_)
